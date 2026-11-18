@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">{% if g.user['role'] == 'admin' %}ADMIN WORKSPACE{% else %}YOUR WORKSPACE{% endif %}</p><h1>Your photo archive<span class="accent">.</span></h1><p class="lede">A private library for your images and the details behind them.</p></div><span class="private-badge"><span class="dot"></span> PRIVATE LIBRARY</span></div>
+<div class="workspace-grid">
+  <aside class="upload-panel panel"><p class="section-number">01 / ADD TO YOUR ARCHIVE</p><h2>Upload a photo</h2><p class="muted">We read embedded details from your original file, then create a separate display copy.</p>
+    <form action="{{ url_for('photos.upload') }}" method="post" enctype="multipart/form-data" class="stack" id="upload-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label class="file-zone"><span class="upload-icon" aria-hidden="true">↑</span><strong>Choose a photo</strong><span class="muted" id="file-description">JPEG, PNG, WebP or HEIC / HEIF</span><input type="file" name="photo" id="photo-input" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" required></label>
+      <p class="fine-print limits">Up to 20 MiB · 40 megapixels · One photo at a time</p>
+      <button class="button" id="upload-button" type="submit">Upload photo <span aria-hidden="true">↗</span></button>
+      <p id="upload-status" class="fine-print" role="status"></p>
+    </form>
+    <div class="privacy-note"><strong>Your original stays private.</strong><p>Display copies have embedded metadata removed. Deleting a photo removes its original, display copy, and metadata.</p></div>
+  </aside>
+  <section class="library"><div class="section-heading"><div><p class="section-number">02 / LIBRARY</p><h2>Latest photos <span class="count">{{ photos|length }}</span></h2></div><span class="muted small">Newest uploads first · Up to 100</span></div>
+    {% if photos %}<div class="photo-grid">{% for photo in photos %}
+      <article class="photo-card"><img src="{{ url_for('photos.display_image', photo_id=photo['id']) }}" alt="Uploaded photo {{ loop.index }}" loading="lazy" width="360" height="250"><div class="photo-info"><div class="photo-title"><strong>Photo {{ photo['id'][:8] }}</strong><span class="format">{{ photo['format'] }}</span></div><p class="muted small">{{ photo['width'] }} × {{ photo['height'] }} px · {{ (photo['byte_size'] / 1024 / 1024)|round(2) }} MiB</p><p class="fine-print">Uploaded <time datetime="{{ photo['uploaded_at'] }}">{{ photo['uploaded_at'][:19]|replace('T', ' ') }} UTC</time></p><div class="card-actions">{% if g.user['role'] == 'admin' %}<a class="detail-link" href="{{ url_for('photos.metadata_view', photo_id=photo['id']) }}">View metadata ↗</a>{% endif %}<form class="delete-form" method="post" action="{{ url_for('photos.delete_photo', photo_id=photo['id']) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="text-button danger" type="submit">Delete</button></form></div></div></article>
+    {% endfor %}</div>{% else %}<div class="empty-library"><span class="empty-icon" aria-hidden="true">▧</span><h3>A fresh perspective starts here.</h3><p class="muted">Upload your first photo to begin your private archive.</p><span class="empty-line"></span><p class="fine-print">{% if g.user['role'] == 'admin' %}Capture dates, camera details, and extraction status<br>will be available in each photo’s metadata view.{% else %}Your images are visible to you and your administrators.{% endif %}</p></div>{% endif %}
+  </section>
+</div>
+{% endblock %}

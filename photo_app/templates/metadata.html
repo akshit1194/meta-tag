@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Photo metadata{% endblock %}
+{% macro item(label, value) %}<div class="data-item"><dt>{{ label }}</dt><dd>{% if value is not none and value != '' %}{{ value }}{% else %}<span class="unavailable">Not available</span>{% endif %}</dd></div>{% endmacro %}
+{% block content %}
+{% set fields = metadata.fields %}{% set capture = fields.capture %}
+<a class="back-link" href="{{ url_for('photos.index') }}">← Back to archive</a>
+<div class="page-heading metadata-heading"><div><p class="eyebrow">ADMIN / PHOTO DETAILS</p><h1>A closer look<span class="accent">.</span></h1><p class="lede">Embedded details from the original uploaded file.</p></div><span class="status status-{{ metadata.status }}">{{ status_labels[metadata.status] }}</span></div>
+<div class="metadata-layout">
+  <aside><div class="preview-panel"><img class="detail-image" src="{{ url_for('photos.display_image', photo_id=photo['id']) }}" alt="Photo display copy"><div class="preview-caption"><strong>Photo {{ photo['id'][:8] }}</strong><span class="muted small">Optimized display copy</span></div></div><div class="verification-note"><span aria-hidden="true">ⓘ</span><p>{{ metadata.disclaimer }}</p></div><div class="retention-note"><p class="eyebrow">ORIGINAL STORAGE</p><p>{% if photo['original_retained'] %}Retained in private storage.{% else %}Not retained under the configured retention policy.{% endif %}</p><p class="fine-print">Originals are never served through a public URL.</p></div></aside>
+  <div class="metadata-sections">
+    <section class="panel"><div class="section-heading"><h2>Capture & upload</h2><span class="section-number">01</span></div><dl class="data-grid">
+      {{ item('Capture date / time · raw DateTimeOriginal', capture.raw) }}
+      {{ item('Capture timezone status', capture.timezone_status|capitalize) }}
+      {{ item('Embedded UTC offset · raw', capture.offset_raw) }}
+      {{ item('Capture subseconds · raw', capture.subseconds_raw) }}
+      {{ item('Capture time · normalized UTC', capture.utc) }}
+      {{ item('Upload time · server UTC', metadata.uploaded_at) }}
+      {{ item('Capture metadata source', capture.source) }}
+    </dl><p class="fine-print inset-note">An unknown timezone stays unknown. Upload time is recorded independently by the server.</p></section>
+    <section class="panel"><div class="section-heading"><h2>Other embedded dates</h2><span class="section-number">02</span></div><dl class="data-grid">{% for date in fields.other_dates %}{{ item(date.label ~ ' · ' ~ date.source, date.raw) }}{% if date.offset_raw %}{{ item(date.label ~ ' · UTC offset', date.offset_raw) }}{% endif %}{% else %}{{ item('Other date fields', none) }}{% endfor %}</dl></section>
+    <section class="panel"><div class="section-heading"><h2>Device & image</h2><span class="section-number">03</span></div><dl class="data-grid">{{ item('Manufacturer', fields.camera.make) }}{{ item('Camera / phone model', fields.camera.model) }}{{ item('Width · original pixels', fields.image.width) }}{{ item('Height · original pixels', fields.image.height) }}{{ item('Embedded EXIF orientation · 1–8', fields.image.orientation) }}{{ item('Detected format', fields.image.format) }}{{ item('Original file size · bytes', fields.image.byte_size) }}</dl></section>
+    <section class="panel"><div class="section-heading"><h2>GPS details</h2><span class="role">Admin only</span></div><dl class="data-grid">{{ item('Latitude · decimal degrees', fields.gps.latitude) }}{{ item('Longitude · decimal degrees', fields.gps.longitude) }}</dl><p class="fine-print inset-note">Location is restricted to authorized administrators.</p></section>
+    <section class="panel"><div class="section-heading"><h2>Extraction record</h2><span class="section-number">05</span></div><dl class="data-grid">{{ item('Status', status_labels[metadata.status]) }}{{ item('Parser', fields.parser) }}{{ item('Safe error code', metadata.error_code) }}<div class="data-item full-width"><dt>Warnings</dt><dd>{% if metadata.warnings %}<ul class="warnings">{% for warning in metadata.warnings %}<li>{{ warning_labels.get(warning, warning) }}</li>{% endfor %}</ul>{% else %}<span class="unavailable">Not available</span>{% endif %}</dd></div><div class="data-item full-width"><dt>SHA-256 · original uploaded bytes</dt><dd class="hash">{{ metadata.sha256 }}</dd></div></dl><p class="fine-print inset-note">The hash identifies this uploaded file. It does not verify the truth of its metadata. Missing metadata does not identify the app or service a photo came from.</p></section>
+  </div>
+</div>
+{% endblock %}

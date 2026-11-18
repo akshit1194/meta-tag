@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Photo Archive{% endblock %} · Efix</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</head>
+<body>
+  <header class="header">
+    <a class="brand" href="{{ url_for('photos.index') }}"><span class="brand-icon" aria-hidden="true">▧</span> efix<span class="brand-divider">/</span><span class="brand-sub">Photo Archive</span></a>
+    {% if g.user %}
+    <div class="account"><span class="role">{{ g.user['role'] }}</span><span>{{ g.user['username'] }}</span>
+      <form action="{{ url_for('logout') }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="text-button">Sign out ↗</button></form>
+    </div>
+    {% else %}<span class="header-note">A private place for your photos</span>{% endif %}
+  </header>
+  <main>{% for message in get_flashed_messages() %}<div class="notice" role="status">{{ message }}</div>{% endfor %}{% block content %}{% endblock %}</main>
+  <footer><span>EFIX PHOTO ARCHIVE</span><span>Private storage. A clearer picture.</span></footer>
+</body>
+</html>

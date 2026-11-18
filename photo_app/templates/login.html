@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Sign in{% endblock %}
+{% block content %}
+<div class="login-layout">
+  <section class="login-intro"><p class="eyebrow">YOUR PHOTOS, IN CONTEXT</p><h1>Every image<br>has a little<br><em>more to tell.</em></h1><p class="lede">Keep your originals private. Explore the details they carry in a dedicated admin workspace.</p><div class="intro-tags"><span>Private originals</span><span>Embedded metadata</span><span>Admin access</span></div></section>
+  <section class="panel login-panel"><span class="section-number">01 / WELCOME BACK</span><h2>Sign in to your archive</h2><p class="muted">Use an account created by your administrator.</p>
+    {% if error %}<p class="error-message" role="alert">{{ error }}</p>{% endif %}
+    <form method="post" class="stack"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Username<input name="username" autocomplete="username" maxlength="80" required autofocus></label>
+      <label>Password<input type="password" name="password" autocomplete="current-password" maxlength="1024" required></label>
+      <button class="button" type="submit">Sign in <span aria-hidden="true">→</span></button>
+    </form>
+    <p class="fine-print">Account creation is managed by your administrator. Photo metadata is visible only to authorized admins.</p>
+  </section>
+</div>
+{% endblock %}
